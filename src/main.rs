@@ -1,10 +1,5 @@
 use std::env;
-
-use chrono::prelude::*;
-use chrono::Duration;
-use tokio::prelude::*;
-
-use feed_bot::rss::{ RssItemsGetter, TelegramBot };
+use feed_bot::rss::TelegramBot;
 
 
 #[tokio::main]

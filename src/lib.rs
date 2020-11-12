@@ -51,7 +51,7 @@ pub mod rss {
                         self.api.send(message.text_reply(format!(
                             "Hi, {}! You just wrote '{}'",
                             &message.from.first_name, data
-                        ))).await;
+                        ))).await.unwrap();
                     }
                 }
             };
