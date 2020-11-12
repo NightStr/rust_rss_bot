@@ -4,6 +4,7 @@ pub mod rss {
     use telegram_bot::*;
     use futures::StreamExt;
     use String;
+    use std::collections::HashMap;
 
     pub type Item = rss::Item;
 
@@ -30,14 +31,20 @@ pub mod rss {
 
     pub struct TelegramBot {
         api: Api,
+        feeds: HashMap<i64, String>
     }
 
     impl TelegramBot {
-        pub fn new<T: Into<String> >(token: T) -> Self
-        {
-            return TelegramBot {
+        pub fn new<T: Into<String> >(token: T) -> Self {
+            let mut bot = TelegramBot {
                 api: Api::new(token.into()),
-            }
+                feeds: HashMap::new()
+            };
+            bot.fill_feeds();
+            bot
+        }
+
+        fn fill_feeds(&mut self) {
         }
 
         pub async fn run(self) -> Result<(), &'static str> {
@@ -49,8 +56,8 @@ pub mod rss {
                     if let MessageKind::Text { ref data, .. } = message.kind {
                         println!("<{}>: {}", &message.from.first_name, data);
                         self.api.send(message.text_reply(format!(
-                            "Hi, {}! You just wrote '{}'",
-                            &message.from.first_name, data
+                            "Hi, {}! You just wrote '{}'. Your ID: {}",
+                            &message.from.first_name, data, message.from.id
                         ))).await.unwrap();
                     }
                 }
