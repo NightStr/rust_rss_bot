@@ -10,6 +10,8 @@ edition = "2018"
 rss = { version = "1.9.0", features = ["from_url"] }
 chrono = "0.4"
 telegram-bot = "0.7.0"
+tokio = { version = "0.2.*", features = ["full"]}
+futures = "0.3"
 
 [lib]
 name = "feed_bot"
