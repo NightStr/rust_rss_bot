@@ -13,6 +13,7 @@ telegram-bot = "0.7.0"
 tokio = { version = "0.2.*", features = ["full"]}
 futures = "0.3"
 dotenv = "0.15.0"
+regex = "1"
 
 [lib]
 name = "feed_bot"
