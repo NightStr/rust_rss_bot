@@ -57,11 +57,11 @@ pub mod rss {
                 api: Api::new(token.into()),
                 feeds: HashMap::new()
             };
-            bot.fill_feeds();
+            bot.load_feeds();
             bot
         }
 
-        fn fill_feeds(&mut self) {
+        fn load_feeds(&mut self) {
         }
 
         fn add_feed<T: Into<String>>(&mut self, user_id: i64, url: T) {
@@ -93,11 +93,11 @@ pub mod rss {
         pub async fn run(&mut self) -> Result<(), &'static str> {
             let mut stream = self.api.stream();
             while let Some(update) = stream.next().await {
-                // If the received update contains a new message...
-                let update = update.expect("Failed to update");
-                if let UpdateKind::Message(message) = update.kind {
+                if let UpdateKind::Message(message) = update.expect(
+                    "Failed to get an update"
+                ).kind {
                     if let MessageKind::Text { ref data, .. } = message.kind {
-                        println!("<{}>: {}", &message.from.first_name, data);
+                        dbg!(&message, data);
                         match Self::parse_message(data) {
                             MessageType::Command{command: c, params: p} => {
                                 match c {
@@ -108,7 +108,7 @@ pub mod rss {
                                 self.api.send(message.text_reply(format!(
                                     "Hi, {}! You just wrote '{}'. Your ID: {}",
                                     &message.from.first_name, data, message.from.id
-                                ))).await.unwrap();
+                                ))).await.expect("Failed to send message");
                             }
                         };
                     }
