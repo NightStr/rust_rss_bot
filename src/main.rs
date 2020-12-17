@@ -1,5 +1,6 @@
 use std::env;
-use feed_bot::rss::TelegramBot;
+use feed_bot::rss::telegram_bot::TelegramBot;
+use futures::join;
 
 use dotenv::dotenv;
 
@@ -10,5 +11,5 @@ async fn main() {
     let mut telegram_bot = TelegramBot::new(
         env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set")
     );
-    telegram_bot.run().await.unwrap();
+    join!(telegram_bot.run());
 }
