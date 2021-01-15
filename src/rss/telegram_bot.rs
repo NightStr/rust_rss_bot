@@ -31,11 +31,7 @@ impl<'a> TelegramBot<'a> {
             api: Api::new(token.into()),
             rss_rep
         };
-        bot.load_feeds();
         bot
-    }
-
-    fn load_feeds(&mut self) {
     }
 
     async fn add_feed<T: Into<String>>(&mut self, user_id: i64, url: T) {

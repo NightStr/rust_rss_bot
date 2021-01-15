@@ -36,10 +36,8 @@ impl UserRssRepository for InMemoryUserRepository {
     }
 
     fn get_user_list(&self) -> Vec<Rc<UserRss>> {
-        let mut v = vec![];
-        for user_rss in self.users.borrow().values() {
-            v.push(Rc::clone(user_rss));
-        }
-        v
+        self.users.borrow().values().map(
+            |user_rss| Rc::clone(user_rss)
+        ).collect()
     }
 }
