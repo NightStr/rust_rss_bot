@@ -27,7 +27,7 @@ pub struct TelegramBot<'a> {
 
 impl<'a> TelegramBot<'a> {
     pub fn new<T: Into<String> >(token: T, rss_rep: &'a dyn UserRssRepository) -> Self {
-        let mut bot = TelegramBot {
+        let bot = TelegramBot {
             api: Api::new(token.into()),
             rss_rep
         };

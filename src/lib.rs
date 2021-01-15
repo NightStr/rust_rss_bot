@@ -9,6 +9,7 @@ pub mod rss {
     pub mod reader;
     pub mod repositories;
     pub mod writer;
+    pub mod filter;
 
     pub struct RssItem {
         pub url: String,
@@ -44,4 +45,7 @@ pub mod rss {
         fn get_user_list(&self) -> Vec<Rc<UserRss>>;
     }
 
+    pub trait UserRssItemsFilter {
+        fn filter(&self, user: i64, rep: &String, items: Vec<RssItem>) -> Vec<RssItem>;
+    }
 }
