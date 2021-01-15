@@ -2,7 +2,6 @@ use telegram_bot::*;
 use regex::Regex;
 use futures::StreamExt;
 use crate::rss::UserRssRepository;
-use std::rc::Rc;
 
 
 enum CommandType {
@@ -21,13 +20,13 @@ enum MessageType {
     }
 }
 
-pub struct TelegramBot {
+pub struct TelegramBot<'a> {
     api: Api,
-    rss_rep: Rc<dyn UserRssRepository>,
+    rss_rep: &'a dyn UserRssRepository,
 }
 
-impl TelegramBot {
-    pub fn new<T: Into<String> >(token: T, rss_rep: Rc<dyn UserRssRepository>) -> Self {
+impl<'a> TelegramBot<'a> {
+    pub fn new<T: Into<String> >(token: T, rss_rep: &'a dyn UserRssRepository) -> Self {
         let mut bot = TelegramBot {
             api: Api::new(token.into()),
             rss_rep

@@ -1,19 +1,18 @@
 use super::{RssRep, RssWriter, UserRssRepository};
-use std::rc::Rc;
 
-pub struct RssGetter {
-    rss_rep: Box<dyn RssRep>,
-    rss_writer: Box<dyn RssWriter>,
-    user_rss_getter: Rc<dyn UserRssRepository>
+pub struct RssGetter<'a> {
+    rss_rep: &'a dyn RssRep,
+    rss_writer: &'a dyn RssWriter,
+    user_rss_getter: &'a dyn UserRssRepository
 }
 
-impl RssGetter {
+impl<'a> RssGetter<'a> {
     pub fn new(
-        rss_rep: Box<dyn RssRep>,
-        writer: Box<dyn RssWriter>,
-        rss_reader: Rc<dyn UserRssRepository>
+        rss_rep: &'a dyn RssRep,
+        rss_writer: &'a dyn RssWriter,
+        rss_reader: &'a dyn UserRssRepository
     ) -> Self {
-        RssGetter {rss_rep: rss_rep, rss_writer: writer, user_rss_getter: rss_reader }
+        RssGetter {rss_rep, rss_writer, user_rss_getter: rss_reader }
     }
 
     pub async fn work(&self) {

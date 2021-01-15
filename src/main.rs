@@ -7,21 +7,22 @@ use feed_bot::rss::reader::RssItemsGetter;
 use futures::join;
 
 use dotenv::dotenv;
-use std::rc::Rc;
 
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
-    let rep = Rc::new(InMemoryUserRepository::new());
+    let rss_item_getter = RssItemsGetter::new();
+    let rss_writer = ConsoleWriter::new();
+    let user_rss_rep = InMemoryUserRepository::new();
     let mut telegram_bot = TelegramBot::new(
         env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set"),
-        rep.clone(),
+        &user_rss_rep,
     );
     let rss_getter = RssGetter::new(
-        Box::new(RssItemsGetter::new()),
-        Box::new(ConsoleWriter::new()),
-        rep.clone(),
+        &rss_item_getter,
+        &rss_writer,
+        &user_rss_rep,
     );
     join!(telegram_bot.run(), rss_getter.work());
 }
