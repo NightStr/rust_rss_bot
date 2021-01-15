@@ -1,21 +1,22 @@
 pub mod rss {
     use String;
     use chrono::{DateTime, Utc};
-    use std::collections::HashMap;
     use async_trait::async_trait;
-    use std::pin::Pin;
+    use std::rc::Rc;
 
     pub mod feeder;
     pub mod telegram_bot;
     pub mod reader;
     pub mod repositories;
+    pub mod writer;
 
     pub struct RssItem {
         pub url: String,
         pub title: String,
         pub created_date: DateTime<Utc>
     }
-    
+
+    #[derive(Debug)]
     pub struct UserRss {
         pub user_id: i64,
         pub subscribes: Vec<String>
@@ -29,7 +30,7 @@ pub mod rss {
 
     #[async_trait]
     pub trait RssRep {
-        async fn get_rss(&self, url: &str) -> Vec<RssItem>;
+        fn get_rss(&self, url: &str) -> Vec<RssItem>;
     }
     
     #[async_trait]
@@ -39,8 +40,8 @@ pub mod rss {
     
     #[async_trait]
     pub trait UserRssRepository {
-        async fn add_subscribe(&mut self, user_id: i64, subscribe: String) -> Result<(), String>;
-        async fn get_user_list(&self) -> Vec<&UserRss>;
+        fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String>;
+        fn get_user_list(&self) -> Vec<Rc<UserRss>>;
     }
 
 }

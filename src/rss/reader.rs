@@ -1,7 +1,6 @@
 use rss;
 use chrono::{DateTime, Utc};
 use super::{RssRep, RssItem};
-use std::fs::read_to_string;
 use async_trait::async_trait;
 
 
@@ -9,14 +8,15 @@ pub struct RssItemsGetter {
 }
 
 impl RssItemsGetter {
-    pub fn new(url: &str) -> RssItemsGetter {
+    pub fn new() -> RssItemsGetter {
         RssItemsGetter {}
     }
 }
 
 #[async_trait]
 impl RssRep for RssItemsGetter {
-    async fn get_rss(&self, url: &str) -> Vec<RssItem> {
+    fn get_rss(&self, url: &str) -> Vec<RssItem> {
+        dbg!(url);
         let channel = rss::Channel::from_url(url).unwrap();
         let mut r: Vec<RssItem> = Vec::new();
         for item in channel.items().iter() {

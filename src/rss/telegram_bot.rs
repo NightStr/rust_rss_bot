@@ -1,7 +1,8 @@
 use telegram_bot::*;
-use std::collections::HashMap;
 use regex::Regex;
 use futures::StreamExt;
+use crate::rss::UserRssRepository;
+use std::rc::Rc;
 
 
 enum CommandType {
@@ -22,14 +23,14 @@ enum MessageType {
 
 pub struct TelegramBot {
     api: Api,
-    feeds: HashMap<i64, Vec<String>>
+    rss_rep: Rc<dyn UserRssRepository>,
 }
 
 impl TelegramBot {
-    pub fn new<T: Into<String> >(token: T) -> Self {
+    pub fn new<T: Into<String> >(token: T, rss_rep: Rc<dyn UserRssRepository>) -> Self {
         let mut bot = TelegramBot {
             api: Api::new(token.into()),
-            feeds: HashMap::new()
+            rss_rep
         };
         bot.load_feeds();
         bot
@@ -38,17 +39,17 @@ impl TelegramBot {
     fn load_feeds(&mut self) {
     }
 
-    fn add_feed<T: Into<String>>(&mut self, user_id: i64, url: T) {
-        self.feeds.entry(user_id).or_insert(Vec::new()).push(url.into());
-        println!("{:?}", self.feeds);
+    async fn add_feed<T: Into<String>>(&mut self, user_id: i64, url: T) {
+        self.rss_rep.add_subscribe(user_id, url.into()).unwrap();
     }
 
     fn parse_message(data: &String) -> MessageType {
-        let re = Regex::new(r"/(?P<command>\w*) (?P<params>\w*)").unwrap();
+        let re = Regex::new(r"/(?P<command>\w*) (?P<params>.*)").unwrap();
         match re.captures(data) {
             Some(cap) => {
                 match cap {
                     cap if cap["command"] == "add".to_string() && cap["params"].len() > 0 => {
+                        dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Add,
                             params: cap["params"].to_string()}
@@ -75,7 +76,7 @@ impl TelegramBot {
                     match Self::parse_message(data) {
                         MessageType::Command{command: c, params: p} => {
                             match c {
-                                CommandType::Add => dbg!(self.add_feed(message.from.id.into(), p))
+                                CommandType::Add => dbg!(self.add_feed(message.from.id.into(), p).await)
                             }
                         },
                         _ => {
