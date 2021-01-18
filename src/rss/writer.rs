@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use crate::rss::{RssWriter, RssItem};
 use telegram_bot::{Api, SendMessage, ChatRef, ParseMode};
-use telegram_bot::prelude::*;
-use core::slice::Chunks;
 
 pub struct ConsoleWriter{}
 

@@ -2,7 +2,7 @@ use std::env;
 use feed_bot::rss::telegram_bot::TelegramBot;
 use feed_bot::rss::feeder::RssGetter;
 use feed_bot::rss::repositories::InMemoryUserRepository;
-use feed_bot::rss::writer::{ConsoleWriter, TelegramWriter};
+use feed_bot::rss::writer::TelegramWriter;
 use feed_bot::rss::reader::RssItemsGetter;
 use feed_bot::rss::filter::FilterByLastRequestData;
 use futures::join;
