@@ -22,9 +22,9 @@ impl<'a> RssGetter<'a> {
         loop {
             for user in self.user_rss_getter.get_user_list() {
                 for url in &user.subscribes {
-                    for rss in self.filter.filter(user.user_id, url, self.rss_rep.get_rss(url.as_str())) {
-                        self.rss_writer.write(user.user_id, rss.title.as_str()).await;
-                    }
+                    self.rss_writer.write(user.user_id, self.filter.filter(
+                        user.user_id, url, self.rss_rep.get_rss(url.as_str())
+                    )).await;
                 }
             }
             tokio::time::delay_for(tokio::time::Duration::from_millis(10000)).await;

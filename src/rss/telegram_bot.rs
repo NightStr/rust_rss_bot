@@ -21,20 +21,20 @@ enum MessageType {
 }
 
 pub struct TelegramBot<'a> {
-    api: Api,
+    api: &'a Api,
     rss_rep: &'a dyn UserRssRepository,
 }
 
 impl<'a> TelegramBot<'a> {
-    pub fn new<T: Into<String> >(token: T, rss_rep: &'a dyn UserRssRepository) -> Self {
+    pub fn new(api: &'a Api, rss_rep: &'a dyn UserRssRepository) -> Self {
         let bot = TelegramBot {
-            api: Api::new(token.into()),
+            api,
             rss_rep
         };
         bot
     }
 
-    async fn add_feed<T: Into<String>>(&mut self, user_id: i64, url: T) {
+    async fn add_feed<T: Into<String>>(&self, user_id: i64, url: T) {
         self.rss_rep.add_subscribe(user_id, url.into()).unwrap();
     }
 
@@ -60,7 +60,7 @@ impl<'a> TelegramBot<'a> {
         }
     }
 
-    pub async fn run(&mut self) -> Result<(), &'static str> {
+    pub async fn run(&self) -> Result<(), &'static str> {
         let mut stream = self.api.stream();
         while let Some(update) = stream.next().await {
             if let UpdateKind::Message(message) = update.expect(

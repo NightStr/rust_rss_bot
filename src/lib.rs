@@ -36,7 +36,7 @@ pub mod rss {
     
     #[async_trait]
     pub trait RssWriter {
-        async fn write(&self, user_id: i64, text: &str);
+        async fn write(&self, user_id: i64, rss_list: Vec<RssItem>);
     }
     
     #[async_trait]
