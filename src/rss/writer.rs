@@ -34,7 +34,7 @@ impl<'a> RssWriter for TelegramWriter<'a> {
     async fn write(&self, user_id: i64, rss_list: Vec<RssItem>) {
         for chunk in rss_list.chunks(10) {
             let message = chunk.iter().map(
-                |i| -> String { format!("[{}]({})", i.title, i.url) }
+                |i| format!("[{}]({})", i.title, i.url)
             ).fold(String::new(), |r, a| format!("{}\n{}", r, a));
             let mut request = SendMessage::new(ChatRef::Id(user_id.into()), message);
             request.disable_preview();
