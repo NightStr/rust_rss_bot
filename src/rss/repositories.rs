@@ -5,6 +5,7 @@ use async_trait::async_trait;
 use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::rc::Rc;
+use std::fs::read_to_string;
 
 
 #[derive(Debug)]
@@ -26,11 +27,11 @@ impl UserRssRepository for InMemoryUserRepository {
         let user_rss = match users.get_mut(&user_id) {
             Some(user) => user,
             None => {
-                users.insert(user_id, Rc::new(UserRss { user_id, subscribes: Vec::new() }));
+                users.insert(user_id, Rc::new(UserRss { user_id, subscribes: RefCell::new(Vec::new()) }));
                 users.get_mut(&user_id).unwrap()
             }
         };
-        Rc::get_mut(user_rss).unwrap().add_subscribe(subscribe);
+        user_rss.add_subscribe(subscribe);
         dbg!(users.borrow());
         Ok(())
     }
@@ -39,5 +40,13 @@ impl UserRssRepository for InMemoryUserRepository {
         self.users.borrow().values().map(
             |user_rss| Rc::clone(user_rss)
         ).collect()
+    }
+    fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String> {
+        println!("Remove subscribe {} {}", user_id, subscribe);
+        match self.users.borrow_mut().get_mut(&user_id) {
+            Some(users) => users.rm_subscribe(subscribe),
+            None => return Err(format!("User {} not found", user_id))
+        };
+        return Ok(())
     }
 }

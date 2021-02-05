@@ -17,6 +17,9 @@ impl RssWriter for ConsoleWriter {
             println!("{}: {}", user_id, rss.title);
         }
     }
+    async fn write_error(&self, user_id: i64, error_text: String) {
+        println!("Was error {}: {}", user_id, error_text);
+    }
 }
 
 pub struct TelegramWriter<'a> {
@@ -41,5 +44,11 @@ impl<'a> RssWriter for TelegramWriter<'a> {
             request.parse_mode(ParseMode::Markdown);
             dbg!(self.api.send(request).await);
         }
+    }
+    async fn write_error(&self, user_id: i64, error_text: String) {
+        let mut request = SendMessage::new(ChatRef::Id(user_id.into()), error_text);
+        request.disable_preview();
+        request.parse_mode(ParseMode::Markdown);
+        dbg!(self.api.send(request).await);
     }
 }

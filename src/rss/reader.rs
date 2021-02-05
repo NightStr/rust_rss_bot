@@ -2,6 +2,7 @@ use rss;
 use chrono::{DateTime, Utc};
 use super::{RssRep, RssItem};
 use async_trait::async_trait;
+use rss::Error;
 
 
 pub struct RssItemsGetter {
@@ -15,9 +16,9 @@ impl RssItemsGetter {
 
 #[async_trait]
 impl RssRep for RssItemsGetter {
-    fn get_rss(&self, url: &str) -> Vec<RssItem> {
+    fn get_rss(&self, url: &str) -> Result<Vec<RssItem>, Error> {
         dbg!(url);
-        let channel = rss::Channel::from_url(url).unwrap();
+        let channel = rss::Channel::from_url(url)?;
         let mut r: Vec<RssItem> = Vec::new();
         for item in channel.items().iter() {
             r.push(RssItem{
@@ -28,6 +29,6 @@ impl RssRep for RssItemsGetter {
                 ).unwrap().with_timezone(&Utc),
             });
         }
-        r.into()
+        Ok(r.into())
     }
 }
