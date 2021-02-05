@@ -6,6 +6,7 @@ pub mod rss {
     use rss::Error;
     use std::cell::{RefCell, Ref};
     use std::slice::Iter;
+    use std::fs::read_to_string;
 
     pub mod feeder;
     pub mod telegram_bot;
@@ -23,26 +24,12 @@ pub mod rss {
     #[derive(Debug)]
     pub struct UserRss {
         pub user_id: i64,
-        pub subscribes: RefCell<Vec<String>>
+        pub subscribes: Vec<String>
     }
 
-    impl UserRss {
-        fn add_subscribe(&self, subscribe: String) {
-            let mut subscribes = self.subscribes.borrow_mut();
-            subscribes.push(subscribe);
-        }
-        fn rm_subscribe(&self, subscribe: &String) {
-            let mut subscribes = self.subscribes.borrow_mut();
-            if let Some(index) =  subscribes.iter().position(|x| x == subscribe) {
-                subscribes.remove(index);
-            }
-        }
-        fn get_subsribes(&self) -> Vec<String> {
-            let mut r: Vec<String> = Vec::new();
-            for s in self.subscribes.borrow().iter() {
-                r.push(s.into());
-            }
-            return r
+    impl UserRss  {
+        fn new(user_id: i64, subscribes: Vec<String>) -> Self {
+            Self{user_id, subscribes }
         }
     }
 
@@ -61,7 +48,7 @@ pub mod rss {
     pub trait UserRssRepository {
         fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String>;
         fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String>;
-        fn get_user_list(&self) -> Vec<Rc<UserRss>>;
+        fn get_user_list(&self) -> Vec<UserRss>;
     }
 
     pub trait UserRssItemsFilter {
