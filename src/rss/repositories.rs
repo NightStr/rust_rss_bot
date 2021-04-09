@@ -80,6 +80,7 @@ impl UserRssRepository for LocalFileDatabase {
                 }
             }
         );
+        self.db.save();
         Ok(())
     }
 
@@ -92,6 +93,7 @@ impl UserRssRepository for LocalFileDatabase {
                 }
             }
         );
+        self.db.save();
         Ok(())
     }
 
