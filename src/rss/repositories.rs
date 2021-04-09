@@ -72,22 +72,23 @@ impl LocalFileDatabase {
 
 impl UserRssRepository for LocalFileDatabase {
     fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String> {
-        self.db.read(|mut db| {
-                let mut subscribes = db.get_mut(&user_id);
-                subscribes.push(subscribe);
-                db.insert(user_id, subscribes.clone());
+        self.db.write(|db| {
+                if let Some(subscribes) = db.get_mut(&user_id) {
+                    subscribes.push(subscribe);
+                } else {
+                    db.insert(user_id, vec![subscribe]);
+                }
             }
         );
         Ok(())
     }
 
     fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String> {
-        self.db.read(|mut db| {
+        self.db.write(|db| {
                 if let Some(subscribes) = db.get_mut(&user_id) {
-                    if let Some(index) =  subscribes.iter().position(|x| x == subscribe) {
+                    if let Some(index) = subscribes.iter().position(|x| x == subscribe) {
                         subscribes.remove(index);
                     }
-                    db.insert(user_id, subscribes.clone());
                 }
             }
         );
@@ -96,12 +97,12 @@ impl UserRssRepository for LocalFileDatabase {
 
     fn get_user_list(&self) -> Vec<UserRss> {
         self.db.read(|db| {
-            *db.iter().map(|user_id, subscribes| {
+            db.iter().map(|(user_id, subscribes)| {
                 UserRss::new(
                     *user_id,
                     subscribes.iter().map(String::from).collect()
                 )
             }).collect()
-        })
+        }).unwrap()
     }
 }
