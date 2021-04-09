@@ -5,7 +5,8 @@ use crate::rss::UserRssRepository;
 
 
 enum CommandType {
-    Add
+    Add,
+    Del
 }
 enum MessageType {
     Command {
@@ -38,6 +39,10 @@ impl<'a> TelegramBot<'a> {
         self.rss_rep.add_subscribe(user_id, url.into()).unwrap();
     }
 
+    async fn del_feed<T: Into<String>>(&self, user_id: i64, url: T) {
+        self.rss_rep.rm_subscribe(user_id, &url.into()).unwrap();
+    }
+
     fn parse_message(data: &String) -> MessageType {
         let re = Regex::new(r"/(?P<command>\w*) (?P<params>.*)").unwrap();
         match re.captures(data) {
@@ -47,6 +52,11 @@ impl<'a> TelegramBot<'a> {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Add,
+                            params: cap["params"].to_string()}
+                    }, cap if cap["command"] == "del".to_string() && cap["params"].len() > 0 => {
+                        dbg!("{:?}", &cap);
+                        MessageType::Command{
+                            command: CommandType::Del,
                             params: cap["params"].to_string()}
                     },
                     _ => {
@@ -71,7 +81,8 @@ impl<'a> TelegramBot<'a> {
                     match Self::parse_message(data) {
                         MessageType::Command{command: c, params: p} => {
                             match c {
-                                CommandType::Add => dbg!(self.add_feed(message.from.id.into(), p).await)
+                                CommandType::Add => dbg!(self.add_feed(message.from.id.into(), p).await),
+                                CommandType::Del => dbg!(self.del_feed(message.from.id.into(), p).await)
                             }
                         },
                         _ => {
