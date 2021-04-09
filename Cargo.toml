@@ -10,13 +10,14 @@ edition = "2018"
 rss = { version = "1.9.0", features = ["from_url"] }
 chrono = "0.4"
 telegram-bot = "0.7.0"
-tokio = { version = "0.2.*", features = ["full"]}
+tokio = { version = "0.2.*", features = ["full"] }
 futures = "0.3"
 dotenv = "0.15.0"
 regex = "1"
 log = "0.4"
 env_logger = "0.8"
 async-trait = "0.1.42"
+rustbreak = { version = "2", features = ["ron_enc"] }
 
 [lib]
 name = "feed_bot"

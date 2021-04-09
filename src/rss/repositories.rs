@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::rc::Rc;
 use std::fs::{read_to_string, copy};
+use rustbreak::{ FileDatabase, deser::Ron };
 
 
 #[derive(Debug)]
@@ -55,5 +56,52 @@ impl UserRssRepository for InMemoryUserRepository {
             None => return Err(format!("User {} not found", user_id))
         };
         return Ok(())
+    }
+}
+
+
+pub struct LocalFileDatabase {
+    db: FileDatabase<HashMap<i64, Vec<String>>, Ron>
+}
+
+impl LocalFileDatabase {
+    pub fn new() -> Self {
+        LocalFileDatabase { db: FileDatabase::<HashMap<i64, Vec<String>>, Ron>::load_from_path_or_default("./subscribes.db").unwrap() }
+    }
+}
+
+impl UserRssRepository for LocalFileDatabase {
+    fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String> {
+        self.db.read(|mut db| {
+                let mut subscribes = db.get_mut(&user_id);
+                subscribes.push(subscribe);
+                db.insert(user_id, subscribes.clone());
+            }
+        );
+        Ok(())
+    }
+
+    fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String> {
+        self.db.read(|mut db| {
+                if let Some(subscribes) = db.get_mut(&user_id) {
+                    if let Some(index) =  subscribes.iter().position(|x| x == subscribe) {
+                        subscribes.remove(index);
+                    }
+                    db.insert(user_id, subscribes.clone());
+                }
+            }
+        );
+        Ok(())
+    }
+
+    fn get_user_list(&self) -> Vec<UserRss> {
+        self.db.read(|db| {
+            *db.iter().map(|user_id, subscribes| {
+                UserRss::new(
+                    *user_id,
+                    subscribes.iter().map(String::from).collect()
+                )
+            }).collect()
+        })
     }
 }
