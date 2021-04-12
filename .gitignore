@@ -1,3 +1,4 @@
 /target
 /.env
 /subscribes.db
+/shown_cache.db
