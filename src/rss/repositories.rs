@@ -36,15 +36,6 @@ impl UserRssRepository for InMemoryUserRepository {
         Ok(())
     }
 
-    fn get_user_list(&self) -> Vec<UserRss> {
-        return self.users_subscribes.borrow().iter().map(
-            |(user, subscribes)| UserRss::new(
-                *user,
-                subscribes.iter().map(String::from).collect()
-            )
-        ).collect();
-    }
-
     fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String> {
         println!("Remove subscribe {} {}", user_id, subscribe);
         match self.users_subscribes.borrow_mut().get_mut(&user_id) {
@@ -56,6 +47,15 @@ impl UserRssRepository for InMemoryUserRepository {
             None => return Err(format!("User {} not found", user_id))
         };
         return Ok(())
+    }
+
+    fn get_user_list(&self) -> Vec<UserRss> {
+        return self.users_subscribes.borrow().iter().map(
+            |(user, subscribes)| UserRss::new(
+                *user,
+                subscribes.iter().map(String::from).collect()
+            )
+        ).collect();
     }
 }
 
