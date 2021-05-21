@@ -2,6 +2,7 @@ use telegram_bot::*;
 use regex::Regex;
 use futures::StreamExt;
 use crate::rss::UserRssRepository;
+use std::fmt::Display;
 
 
 enum CommandType {
@@ -35,12 +36,19 @@ impl<'a> TelegramBot<'a> {
         bot
     }
 
-    async fn add_feed<T: Into<String>>(&self, user_id: i64, url: T) {
-        self.rss_rep.add_subscribe(user_id, url.into()).unwrap();
+    async fn add_feed<T: Into<String>>(&self, user_id: i64, url: T) -> String{
+        match self.rss_rep.add_subscribe(user_id, url.into()) {
+            Ok(s) => "Успешно добавлен".to_string(),
+            Err(e) => "Добавить не удалось".to_string(),
+        }
     }
 
-    async fn del_feed<T: Into<String>>(&self, user_id: i64, url: T) {
-        self.rss_rep.rm_subscribe(user_id, &url.into()).unwrap();
+    async fn del_feed<T: Into<String>>(&self, user_id: i64, url: T) -> String {
+        let inner_url = url.into();
+        match self.rss_rep.rm_subscribe(user_id, &inner_url) {
+            Ok(_) => "Успешно удалено".to_string(),
+            Err(_) => "Удалить не удалось".to_string(),
+        }
     }
 
     fn parse_message(data: &String) -> MessageType {
@@ -78,7 +86,7 @@ impl<'a> TelegramBot<'a> {
             ).kind {
                 if let MessageKind::Text { ref data, .. } = message.kind {
                     dbg!(&message, data);
-                    match Self::parse_message(data) {
+                     self.api.send(message.text_reply(match Self::parse_message(data) {
                         MessageType::Command{command: c, params: p} => {
                             match c {
                                 CommandType::Add => dbg!(self.add_feed(message.from.id.into(), p).await),
@@ -86,12 +94,9 @@ impl<'a> TelegramBot<'a> {
                             }
                         },
                         _ => {
-                            self.api.send(message.text_reply(format!(
-                                "Hi, {}! You just wrote '{}'. Your ID: {}",
-                                &message.from.first_name, data, message.from.id
-                            ))).await.expect("Failed to send message");
+                            "Привет, я тебя не понимаю, попробуй еще раз".to_string()
                         }
-                    };
+                    })).await.expect("Failed to send message");
                 }
             }
         };
