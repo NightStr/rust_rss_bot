@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use chrono::{DateTime, Utc, FixedOffset};
+use chrono::{DateTime, Utc, FixedOffset, Duration};
 use crate::rss::{UserRssItemsFilter, RssItem};
 use std::cell::RefCell;
 use rustbreak::FileDatabase;
@@ -22,10 +22,10 @@ impl UserRssItemsFilter for FilterByLastRequestData {
         let key = format!("{} {}", user, rep);
         let r = self.last_request_cache.write(|db| {
             let mut r = vec![];
-            let last_request: Option<DateTime<Utc>> = if let Some(last_request_str) = db.get(&key) {
-                Some(DateTime::parse_from_rfc2822(&last_request_str).unwrap().into())
+            let last_request: DateTime<Utc> = if let Some(last_request_str) = db.get(&key) {
+                DateTime::parse_from_rfc2822(&last_request_str).unwrap().into()
             } else {
-                None
+                Utc::now() - Duration::days(2)
             };
             let mut max_created_date: Option<DateTime<Utc>> = None;
             for item in items {
@@ -34,11 +34,7 @@ impl UserRssItemsFilter for FilterByLastRequestData {
                     Some(mcd) if mcd < item.created_date => Some(item.created_date.clone()),
                     Some(mcd) => Some(mcd),
                 };
-                if let Some(last_request) = last_request {
-                    if last_request < item.created_date {
-                        r.push(item);
-                    }
-                } else {
+                if last_request < item.created_date {
                     r.push(item);
                 }
             }
