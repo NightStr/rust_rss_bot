@@ -34,15 +34,18 @@ impl<'a> TelegramWriter<'a> {
 
 #[async_trait]
 impl<'a> RssWriter for TelegramWriter<'a> {
-    async fn write(&self, user_id: i64, rss_list: Vec<RssItem>) {
-        for chunk in rss_list.chunks(10) {
-            let message = chunk.iter().map(
-                |i| format!("[{}]({})", i.title, i.url)
-            ).fold(String::new(), |r, a| format!("{}\n{}", r, a));
-            let mut request = SendMessage::new(ChatRef::Id(user_id.into()), message);
-            request.disable_preview();
-            request.parse_mode(ParseMode::Markdown);
-            dbg!(self.api.send(request).await);
+    async fn write(&self, user_id: i64, rss_items: Vec<RssItem>) {
+        for chunk in rss_items.chunks(10) {
+            for item in chunk {
+                let message_title = format!("[{}]({})", item.title, item.url);
+                let message = match &item.description {
+                    Some(description) => format!("{}\n\n{}", message_title, description),
+                    None => message_title
+                };
+                let mut request = SendMessage::new(ChatRef::Id(user_id.into()), message);
+                request.parse_mode(ParseMode::Markdown);
+                dbg!(self.api.send(request).await);
+            }
         }
     }
     async fn write_error(&self, user_id: i64, error_text: String) {

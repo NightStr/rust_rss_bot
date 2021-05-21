@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use super::{RssRep, RssItem};
 use async_trait::async_trait;
 use rss::Error;
+use html2text::from_read;
 
 
 pub struct RssItemsGetter {
@@ -27,6 +28,10 @@ impl RssRep for RssItemsGetter {
                 created_date: DateTime::parse_from_rfc2822(
                     item.pub_date().unwrap_or_default()
                 ).unwrap().with_timezone(&Utc),
+                description: match item.description() {
+                    Some(description) => Some(from_read(description.as_bytes(), description.len())),
+                    None => None
+                }
             });
         }
         r.reverse();

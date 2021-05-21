@@ -14,7 +14,8 @@ pub mod rss {
     pub struct RssItem {
         pub url: String,
         pub title: String,
-        pub created_date: DateTime<Utc>
+        pub created_date: DateTime<Utc>,
+        pub description: Option<String>
     }
 
     #[derive(Debug)]
