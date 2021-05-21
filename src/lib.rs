@@ -46,6 +46,7 @@ pub mod rss {
         fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String>;
         fn rm_subscribe(&self, user_id: i64, subscribe: &String) -> Result<(), String>;
         fn get_user_list(&self) -> Vec<UserRss>;
+        fn get_user_subscribes(&self, user_id: i64) -> Option<Vec<String>>;
     }
 
     pub trait UserRssItemsFilter {

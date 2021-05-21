@@ -57,6 +57,18 @@ impl UserRssRepository for InMemoryUserRepository {
             )
         ).collect();
     }
+
+    fn get_user_subscribes(&self, user_id: i64) -> Option<Vec<String>> {
+        if let Some(subscribes) = self.users_subscribes.borrow().get(&user_id) {
+            let mut r = vec![];
+            for sub in subscribes {
+                r.push(String::from(sub));
+            }
+            Some(r)
+        } else {
+            None
+        }
+    }
 }
 
 
@@ -105,6 +117,20 @@ impl UserRssRepository for LocalFileDatabase {
                     subscribes.iter().map(String::from).collect()
                 )
             }).collect()
+        }).unwrap()
+    }
+
+    fn get_user_subscribes(&self, user_id: i64) -> Option<Vec<String>> {
+        self.db.read(|db| {
+            if let Some(subscribes) = db.get(&user_id) {
+                let mut r = vec![];
+                for sub in subscribes {
+                    r.push(String::from(sub));
+                }
+                Some(r)
+            } else {
+                None
+            }
         }).unwrap()
     }
 }
