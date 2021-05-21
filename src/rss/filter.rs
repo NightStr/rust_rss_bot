@@ -21,19 +21,31 @@ impl UserRssItemsFilter for FilterByLastRequestData {
     fn filter(&self, user: i64, rep: &String, items: Vec<RssItem>) -> Vec<RssItem> {
         let key = format!("{} {}", user, rep);
         let r = self.last_request_cache.write(|db| {
-            let last_request_str = db.insert(key, Utc::now().to_rfc2822());
-            if let Some(last_request_str) = last_request_str {
-                let last_request: DateTime<Utc> = DateTime::parse_from_rfc2822(&last_request_str).unwrap().into();
-                let mut r = vec![];
-                for item in items {
-                    if item.created_date > last_request {
+            let mut r = vec![];
+            let last_request: Option<DateTime<Utc>> = if let Some(last_request_str) = db.get(&key) {
+                Some(DateTime::parse_from_rfc2822(&last_request_str).unwrap().into())
+            } else {
+                None
+            };
+            let mut max_created_date: Option<DateTime<Utc>> = None;
+            for item in items {
+                max_created_date = match max_created_date {
+                    None => Some(item.created_date.clone()),
+                    Some(mcd) if mcd < item.created_date => Some(item.created_date.clone()),
+                    Some(mcd) => Some(mcd),
+                };
+                if let Some(last_request) = last_request {
+                    if last_request < item.created_date {
                         r.push(item);
                     }
+                } else {
+                    r.push(item);
                 }
-                r
-            } else {
-                items
             }
+            if let Some(mcd) = max_created_date {
+                db.insert(key, mcd.to_rfc2822());
+            }
+            r
         }).unwrap();
         self.last_request_cache.save();
         r

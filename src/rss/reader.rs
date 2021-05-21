@@ -29,6 +29,7 @@ impl RssRep for RssItemsGetter {
                 ).unwrap().with_timezone(&Utc),
             });
         }
-        Ok(r.into())
+        r.reverse();
+        Ok(r)
     }
 }

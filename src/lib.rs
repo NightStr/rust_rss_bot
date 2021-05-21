@@ -2,11 +2,7 @@ pub mod rss {
     use String;
     use chrono::{DateTime, Utc};
     use async_trait::async_trait;
-    use std::rc::Rc;
     use rss::Error;
-    use std::cell::{RefCell, Ref};
-    use std::slice::Iter;
-    use std::fs::read_to_string;
 
     pub mod feeder;
     pub mod telegram_bot;

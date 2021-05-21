@@ -1,6 +1,5 @@
 use super::{RssRep, RssWriter, UserRssRepository};
 use crate::rss::UserRssItemsFilter;
-use std::cell::{RefCell, Ref};
 
 pub struct RssGetter<'a> {
     rss_rep: &'a dyn RssRep,
