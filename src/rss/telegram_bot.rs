@@ -112,7 +112,6 @@ impl<'a> TelegramBot<'a> {
                             "Привет, я тебя не понимаю, попробуй еще раз".to_string()
                         }
                     });
-                    reply_message.parse_mode(ParseMode::Markdown);
                     self.api.send(reply_message).await.expect("Failed to send message");
                 }
             }
