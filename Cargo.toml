@@ -21,6 +21,7 @@ rustbreak = { version = "2", features = ["ron_enc"] }
 html2text = "*"
 strum = "0.20"
 strum_macros = "0.20"
+derive-new = "*"
 
 [lib]
 name = "feed_bot"

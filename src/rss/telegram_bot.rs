@@ -2,6 +2,7 @@ use telegram_bot::*;
 use regex::Regex;
 use futures::StreamExt;
 use crate::rss::UserRssRepository;
+use derive_new::new;
 
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, ToString};
@@ -16,18 +17,14 @@ enum CommandType {
 }
 
 trait Command<'a> {
-    fn new(rss_rep: &'a dyn UserRssRepository) -> Self where Self: Sized;
     fn run(&self, user_id: i64, params: String) -> String;
     fn help(&self) -> String;
 }
 
+#[derive(new)]
 struct DummyCommand;
 
 impl<'a> Command<'a> for DummyCommand {
-    fn new(_rss_rep: &'a dyn UserRssRepository) -> Self {
-        Self{}
-    }
-
     fn run(&self, _user_id: i64, _params: String) -> String {
         "Я просто кукла, чего вы от меня хотите?".to_string()
     }
@@ -37,15 +34,12 @@ impl<'a> Command<'a> for DummyCommand {
     }
 }
 
+#[derive(new)]
 struct AddCommand<'a>{
     rss_rep: &'a dyn UserRssRepository
 }
 
 impl<'a> Command<'a> for AddCommand<'a> {
-    fn new(rss_rep: &'a dyn UserRssRepository) -> Self {
-        Self{rss_rep}
-    }
-
     fn run(&self, user_id: i64, params: String) -> String {
         match self.rss_rep.add_subscribe(user_id, params.into()) {
             Ok(_) => "Успешно добавлен".to_string(),
@@ -58,15 +52,12 @@ impl<'a> Command<'a> for AddCommand<'a> {
     }
 }
 
+#[derive(new)]
 struct DelCommand<'a>{
     rss_rep: &'a dyn UserRssRepository
 }
 
 impl<'a> Command<'a> for DelCommand<'a> {
-    fn new(rss_rep: &'a dyn UserRssRepository) -> Self {
-        Self{rss_rep}
-    }
-
     fn run(&self, user_id: i64, params: String) -> String {
         match self.rss_rep.rm_subscribe(user_id, &params.into()) {
             Ok(_) => "Успешно удалено".to_string(),
@@ -79,15 +70,12 @@ impl<'a> Command<'a> for DelCommand<'a> {
     }
 }
 
+#[derive(new)]
 struct ListCommand<'a>{
     rss_rep: &'a dyn UserRssRepository
 }
 
 impl<'a> Command<'a> for ListCommand<'a> {
-    fn new(rss_rep: &'a dyn UserRssRepository) -> Self {
-        Self{rss_rep}
-    }
-
     fn run(&self, user_id: i64, _params: String) -> String {
         if let Some(subscribes) = self.rss_rep.get_user_subscribes(user_id) {
             subscribes.join("\n")
@@ -101,15 +89,12 @@ impl<'a> Command<'a> for ListCommand<'a> {
     }
 }
 
+#[derive(new)]
 struct HelpCommand<'a>{
     rss_rep: &'a dyn UserRssRepository
 }
 
 impl<'a> Command<'a> for HelpCommand<'a> {
-    fn new(rss_rep: &'a dyn UserRssRepository) -> Self {
-        Self{rss_rep}
-    }
-
     fn run(&self, _user_id: i64, _params: String) -> String {
         CommandType::iter()
         .map(|command_type| format!(
