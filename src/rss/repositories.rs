@@ -3,9 +3,6 @@ use std::collections::HashMap;
 use crate::rss::UserRssRepository;
 use async_trait::async_trait;
 use std::cell::RefCell;
-use std::borrow::Borrow;
-use std::rc::Rc;
-use std::fs::{read_to_string, copy};
 use rustbreak::{ FileDatabase, deser::Ron };
 
 
@@ -91,8 +88,8 @@ impl UserRssRepository for LocalFileDatabase {
                     db.insert(user_id, vec![subscribe]);
                 }
             }
-        );
-        self.db.save();
+        ).unwrap();
+        self.db.save().unwrap();
         Ok(())
     }
 
@@ -104,8 +101,8 @@ impl UserRssRepository for LocalFileDatabase {
                     }
                 }
             }
-        );
-        self.db.save();
+        ).unwrap();
+        self.db.save().unwrap();
         Ok(())
     }
 

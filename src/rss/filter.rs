@@ -1,7 +1,6 @@
 use std::collections::HashMap;
-use chrono::{DateTime, Utc, FixedOffset, Duration};
+use chrono::{DateTime, Utc, Duration};
 use crate::rss::{UserRssItemsFilter, RssItem};
-use std::cell::RefCell;
 use rustbreak::FileDatabase;
 use rustbreak::deser::Ron;
 
@@ -43,7 +42,7 @@ impl UserRssItemsFilter for FilterByLastRequestData {
             }
             r
         }).unwrap();
-        self.last_request_cache.save();
+        self.last_request_cache.save().unwrap();
         r
     }
 }

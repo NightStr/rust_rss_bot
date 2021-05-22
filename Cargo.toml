@@ -19,6 +19,8 @@ env_logger = "0.8"
 async-trait = "0.1.42"
 rustbreak = { version = "2", features = ["ron_enc"] }
 html2text = "*"
+strum = "0.20"
+strum_macros = "0.20"
 
 [lib]
 name = "feed_bot"

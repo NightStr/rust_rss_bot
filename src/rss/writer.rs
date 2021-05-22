@@ -44,7 +44,7 @@ impl<'a> RssWriter for TelegramWriter<'a> {
                 };
                 let mut request = SendMessage::new(ChatRef::Id(user_id.into()), message);
                 request.parse_mode(ParseMode::Markdown);
-                dbg!(self.api.send(request).await);
+                dbg!(self.api.send(request).await.unwrap());
             }
         }
     }
@@ -52,6 +52,6 @@ impl<'a> RssWriter for TelegramWriter<'a> {
         let mut request = SendMessage::new(ChatRef::Id(user_id.into()), error_text);
         request.disable_preview();
         request.parse_mode(ParseMode::Markdown);
-        dbg!(self.api.send(request).await);
+        dbg!(self.api.send(request).await.unwrap());
     }
 }
