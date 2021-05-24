@@ -1,5 +1,6 @@
 use super::{RssRep, RssWriter, UserRssRepository};
 use crate::rss::UserRssItemsFilter;
+use rss::Error;
 
 pub struct RssGetter<'a> {
     rss_rep: &'a dyn RssRep,
@@ -32,14 +33,27 @@ impl<'a> RssGetter<'a> {
                             ).await
                         },
                         Err(e) => {
-                            self.rss_writer.write_error(
-                                user.user_id,
-                                format!(
-                                    "При обработке {} произошла ошибка {}. \
-                                    Ссылка была удалена из подписок.", url, e
-                                )
-                            ).await;
-                            self.user_rss_getter.rm_subscribe(user.user_id, url).unwrap();
+                            match e {
+                                Error::Utf8(_) | Error::Xml(_) | Error::InvalidStartTag
+                                | Error::Eof => {
+                                    self.rss_writer.write_error(
+                                        user.user_id,
+                                    format!(
+                                                "При обработке {} произошла ошибка {}. \
+                                                Ссылка была удалена из подписок.", url, e
+                                            )
+                                    ).await;
+                                    self.user_rss_getter
+                                    .rm_subscribe(user.user_id, url)
+                                    .unwrap();
+                                }
+                                Error::UrlRequest(_) | Error::Io(_)  => {
+                                    dbg!(format!(
+                                        "При обработке {} произошла ошибка {}. \
+                                        Ссылка была удалена из подписок.", url, e
+                                    ));
+                                }
+                            }
                         }
                     };
                 }

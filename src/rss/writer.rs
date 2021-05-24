@@ -32,6 +32,14 @@ impl<'a> TelegramWriter<'a> {
     }
 }
 
+impl<'a> TelegramWriter<'a> {
+    async fn write_request(&self, request: SendMessage<'_>) {
+        if let Err(e) = self.api.send(request).await {
+            println!("Failed to write a message in telegram due error {}", e);
+        }
+    }
+}
+
 #[async_trait]
 impl<'a> RssWriter for TelegramWriter<'a> {
     async fn write(&self, user_id: i64, rss_items: Vec<RssItem>) {
@@ -44,7 +52,7 @@ impl<'a> RssWriter for TelegramWriter<'a> {
                 };
                 let mut request = SendMessage::new(ChatRef::Id(user_id.into()), message);
                 request.parse_mode(ParseMode::Markdown);
-                dbg!(self.api.send(request).await.unwrap());
+                self.write_request(request).await;
             }
         }
     }
@@ -52,6 +60,6 @@ impl<'a> RssWriter for TelegramWriter<'a> {
         let mut request = SendMessage::new(ChatRef::Id(user_id.into()), error_text);
         request.disable_preview();
         request.parse_mode(ParseMode::Markdown);
-        dbg!(self.api.send(request).await.unwrap());
+        self.write_request(request);
     }
 }
