@@ -47,12 +47,7 @@ impl<'a> RssGetter<'a> {
                                     .rm_subscribe(user.user_id, url)
                                     .unwrap();
                                 }
-                                Error::UrlRequest(_) | Error::Io(_)  => {
-                                    dbg!(format!(
-                                        "При обработке {} произошла ошибка {}. \
-                                        Ссылка была удалена из подписок.", url, e
-                                    ));
-                                }
+                                Error::UrlRequest(_) | Error::Io(_)  => {}
                             }
                         }
                     };

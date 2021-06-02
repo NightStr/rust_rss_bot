@@ -60,6 +60,6 @@ impl<'a> RssWriter for TelegramWriter<'a> {
         let mut request = SendMessage::new(ChatRef::Id(user_id.into()), error_text);
         request.disable_preview();
         request.parse_mode(ParseMode::Markdown);
-        self.write_request(request);
+        self.write_request(request).await;
     }
 }
