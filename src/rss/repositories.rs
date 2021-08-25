@@ -83,7 +83,11 @@ impl UserRssRepository for LocalFileDatabase {
     fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String> {
         self.db.write(|db| {
                 if let Some(subscribes) = db.get_mut(&user_id) {
-                    subscribes.push(subscribe);
+                    if let Err(_) = subscribes.binary_search(&subscribe) {
+                        subscribes.push(subscribe);
+                    } else {
+                        dbg!(format!("{} уже добавлена", subscribe));
+                    }
                 } else {
                     db.insert(user_id, vec![subscribe]);
                 }

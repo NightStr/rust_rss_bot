@@ -43,7 +43,7 @@ impl<'a> Command<'a> for AddCommand<'a> {
     fn run(&self, user_id: i64, params: String) -> String {
         match self.rss_rep.add_subscribe(user_id, params.into()) {
             Ok(_) => "Успешно добавлен".to_string(),
-            Err(_) => format!("Не удалось добавить. {}", self.help()),
+            Err(e) => format!("Не удалось добавить. По причине {}. {}", e, self.help()),
         }
     }
 
