@@ -39,8 +39,7 @@ impl<'a> RssGetter<'a> {
                                     self.rss_writer.write_error(
                                         user.user_id,
                                     format!(
-                                                "При обработке {} произошла ошибка {}. \
-                                                Ссылка была удалена из подписок.", url, e
+                                                "При обработке {} произошла ошибка {}.", url, e
                                             )
                                     ).await;
                                     self.user_rss_getter
