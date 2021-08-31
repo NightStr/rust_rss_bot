@@ -42,9 +42,6 @@ impl<'a> RssGetter<'a> {
                                                 "При обработке {} произошла ошибка {}.", url, e
                                             )
                                     ).await;
-                                    self.user_rss_getter
-                                    .rm_subscribe(user.user_id, url)
-                                    .unwrap();
                                 }
                                 Error::UrlRequest(_) | Error::Io(_)  => {}
                             }
