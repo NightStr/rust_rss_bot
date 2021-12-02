@@ -23,7 +23,7 @@ impl RssItemsGetter {
 impl RssGetterResult {
     pub fn new(url: &str) -> Self {
         let channel = rss::Channel::from_url(url).unwrap();
-        let curr = channel.items().len();
+        let curr = channel.items().len() - 1;
         Self {channel, curr}
     }
 }
