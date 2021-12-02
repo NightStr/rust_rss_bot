@@ -25,12 +25,16 @@ impl<'a> RssGetter<'a> {
                 for ref url in user.subscribes {
                     match self.rss_rep.get_rss(url.as_str()) {
                         Ok(rss_list) => {
-                            self.rss_writer.write(
-                                user.user_id,
-                                self.filter.filter(
-                                    user.user_id, url, rss_list
-                                )
-                            ).await
+                            for item in rss_list {
+                                if self.filter.filter(
+                                    user.user_id, url, &item
+                                ) {
+                                    self.rss_writer.write(
+                                        user.user_id,
+                                        item
+                                    ).await
+                                }
+                            }
                         },
                         Err(e) => {
                             match e {

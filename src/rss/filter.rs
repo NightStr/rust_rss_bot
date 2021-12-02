@@ -17,30 +17,20 @@ impl FilterByLastRequestData {
 }
 
 impl UserRssItemsFilter for FilterByLastRequestData {
-    fn filter(&self, user: i64, rep: &String, items: Vec<RssItem>) -> Vec<RssItem> {
+    fn filter(&self, user: i64, rep: &String, item: &RssItem) -> bool {
         let key = format!("{} {}", user, rep);
         let r = self.last_request_cache.write(|db| {
-            let mut r = vec![];
             let last_request: DateTime<Utc> = if let Some(last_request_str) = db.get(&key) {
                 DateTime::parse_from_rfc2822(&last_request_str).unwrap().into()
             } else {
                 Utc::now() - Duration::days(2)
             };
-            let mut max_created_date: Option<DateTime<Utc>> = None;
-            for item in items {
-                max_created_date = match max_created_date {
-                    None => Some(item.created_date.clone()),
-                    Some(mcd) if mcd < item.created_date => Some(item.created_date.clone()),
-                    Some(mcd) => Some(mcd),
-                };
-                if last_request < item.created_date {
-                    r.push(item);
-                }
+            if last_request < item.created_date {
+                db.insert(key, item.created_date.to_rfc2822());
+                true
+            } else {
+                false
             }
-            if let Some(mcd) = max_created_date {
-                db.insert(key, mcd.to_rfc2822());
-            }
-            r
         }).unwrap();
         self.last_request_cache.save().unwrap();
         r

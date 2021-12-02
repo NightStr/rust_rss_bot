@@ -32,12 +32,12 @@ pub mod rss {
 
     #[async_trait]
     pub trait RssRep {
-        fn get_rss(&self, url: &str) -> Result<Vec<RssItem>, Error>;
+        fn get_rss(&self, url: &str) -> Result<Box<dyn Iterator<Item=RssItem>>, Error>;
     }
     
     #[async_trait]
     pub trait RssWriter {
-        async fn write(&self, user_id: i64, rss_list: Vec<RssItem>);
+        async fn write(&self, user_id: i64, item: RssItem);
         async fn write_error(&self, user_id: i64, error_text: String);
     }
     
@@ -50,6 +50,6 @@ pub mod rss {
     }
 
     pub trait UserRssItemsFilter {
-        fn filter(&self, user: i64, rep: &String, items: Vec<RssItem>) -> Vec<RssItem>;
+        fn filter(&self, user: i64, rep: &String, item: &RssItem) -> bool;
     }
 }

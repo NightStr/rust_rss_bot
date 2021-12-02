@@ -9,32 +9,54 @@ use html2text::from_read;
 pub struct RssItemsGetter {
 }
 
+pub struct RssGetterResult {
+    channel: rss::Channel,
+    curr: usize
+}
+
 impl RssItemsGetter {
     pub fn new() -> RssItemsGetter {
         RssItemsGetter {}
     }
 }
 
+impl RssGetterResult {
+    pub fn new(url: &str) -> Self {
+        let channel = rss::Channel::from_url(url).unwrap();
+        let curr = channel.items().len();
+        Self {channel, curr}
+    }
+}
+
+
+impl Iterator for RssGetterResult {
+    type Item = RssItem;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.channel.items().get(self.curr) {
+            Some(item) => {
+                self.curr -= 1;
+                Some(RssItem {
+                    url: String::from(item.link().unwrap_or_default()),
+                    title: String::from(item.title().unwrap_or_default()),
+                    created_date: DateTime::parse_from_rfc2822(
+                        item.pub_date().unwrap_or_default()
+                    ).unwrap().with_timezone(&Utc),
+                    description: match item.description() {
+                        Some(description) => Some(from_read(description.as_bytes(), description.len())),
+                        None => None
+                    }
+                })
+            },
+            None => None
+        }
+    }
+}
+
 #[async_trait]
 impl RssRep for RssItemsGetter {
-    fn get_rss(&self, url: &str) -> Result<Vec<RssItem>, Error> {
+    fn get_rss(&self, url: &str) -> Result<Box<dyn Iterator<Item=RssItem>>, Error> {
         dbg!(url);
-        let channel = rss::Channel::from_url(url)?;
-        let mut r: Vec<RssItem> = Vec::new();
-        for item in channel.items().iter() {
-            r.push(RssItem{
-                url: String::from(item.link().unwrap_or_default()),
-                title: String::from(item.title().unwrap_or_default()),
-                created_date: DateTime::parse_from_rfc2822(
-                    item.pub_date().unwrap_or_default()
-                ).unwrap().with_timezone(&Utc),
-                description: match item.description() {
-                    Some(description) => Some(from_read(description.as_bytes(), description.len())),
-                    None => None
-                }
-            });
-        }
-        r.reverse();
-        Ok(r)
+        Ok(Box::new(RssGetterResult::new(url)))
     }
 }
