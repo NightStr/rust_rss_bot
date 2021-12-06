@@ -157,22 +157,22 @@ impl<'a> TelegramBot<'a> {
         match re.captures(data) {
             Some(cap) => {
                 match cap {
-                    cap if cap["command"] == "add".to_string() && cap["params"].len() > 0 => {
+                    cap if cap["command"].eq("add") && cap["params"].len() > 0 => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Add,
                             params: cap["params"].to_string()}
-                    }, cap if cap["command"] == "del".to_string() && cap["params"].len() > 0 => {
+                    }, cap if cap["command"].eq("del") && cap["params"].len() > 0 => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Del,
                             params: cap["params"].to_string()}
-                    }, cap if cap["command"] == "list".to_string() && cap["params"].len() == 0 => {
+                    }, cap if cap["command"].eq("list") && cap["params"].len() == 0 => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::List,
                             params: "".to_string()}
-                    }, cap if cap["command"] == "help".to_string() && cap["params"].len() == 0 => {
+                    }, cap if cap["command"].eq("help") && cap["params"].len() == 0 => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Help,

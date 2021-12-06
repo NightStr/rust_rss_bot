@@ -20,10 +20,7 @@ impl UserRssItemsFilter for FilterByLastRequestData {
     fn filter(&self, user: i64, rep: &String, item: &RssItem) -> bool {
         let key = format!("{} {}", user, rep);
         let last_request = match  self.last_request_cache.read(|db| {
-            match db.get(&key) {
-                Some(v) => Some(DateTime::parse_from_rfc2822(v).unwrap().into()),
-                None => None
-            }
+            db.get(&key).map(|v| DateTime::parse_from_rfc2822(v).unwrap().into())
         }).unwrap() {
             Some(v) => v,
             None => Utc::now() - Duration::days(2)
