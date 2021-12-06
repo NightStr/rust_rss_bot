@@ -41,7 +41,7 @@ struct AddCommand<'a>{
 
 impl<'a> Command<'a> for AddCommand<'a> {
     fn run(&self, user_id: i64, params: String) -> String {
-        match self.rss_rep.add_subscribe(user_id, params.into()) {
+        match self.rss_rep.add_subscribe(user_id, params) {
             Ok(_) => "Успешно добавлен".to_string(),
             Err(e) => format!("Не удалось добавить. По причине {}. {}", e, self.help()),
         }
@@ -59,7 +59,7 @@ struct DelCommand<'a>{
 
 impl<'a> Command<'a> for DelCommand<'a> {
     fn run(&self, user_id: i64, params: String) -> String {
-        match self.rss_rep.rm_subscribe(user_id, &params.into()) {
+        match self.rss_rep.rm_subscribe(user_id, &params) {
             Ok(_) => "Успешно удалено".to_string(),
             Err(_) => "Удалить не удалось".to_string(),
         }
@@ -145,11 +145,11 @@ pub struct TelegramBot<'a> {
 
 impl<'a> TelegramBot<'a> {
     pub fn new(api: &'a Api, rss_rep: &'a dyn UserRssRepository) -> Self {
-        let bot = TelegramBot {
+        
+        TelegramBot {
             api,
             rss_rep
-        };
-        bot
+        }
     }
 
     fn parse_message(data: &String) -> MessageType {
@@ -157,22 +157,22 @@ impl<'a> TelegramBot<'a> {
         match re.captures(data) {
             Some(cap) => {
                 match cap {
-                    cap if cap["command"].eq("add") && cap["params"].len() > 0 => {
+                    cap if cap["command"].eq("add") && !cap["params"].is_empty() => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Add,
                             params: cap["params"].to_string()}
-                    }, cap if cap["command"].eq("del") && cap["params"].len() > 0 => {
+                    }, cap if cap["command"].eq("del") && !cap["params"].is_empty() => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Del,
                             params: cap["params"].to_string()}
-                    }, cap if cap["command"].eq("list") && cap["params"].len() == 0 => {
+                    }, cap if cap["command"].eq("list") && cap["params"].is_empty() => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::List,
                             params: "".to_string()}
-                    }, cap if cap["command"].eq("help") && cap["params"].len() == 0 => {
+                    }, cap if cap["command"].eq("help") && cap["params"].is_empty() => {
                         dbg!("{:?}", &cap);
                         MessageType::Command{
                             command: CommandType::Help,

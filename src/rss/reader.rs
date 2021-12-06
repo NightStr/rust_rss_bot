@@ -42,10 +42,7 @@ impl Iterator for RssGetterResult {
                     created_date: DateTime::parse_from_rfc2822(
                         item.pub_date().unwrap_or_default()
                     ).unwrap().with_timezone(&Utc),
-                    description: match item.description() {
-                        Some(description) => Some(from_read(description.as_bytes(), description.len())),
-                        None => None
-                    }
+                    description: item.description().map(|description| from_read(description.as_bytes(), description.len()))
                 })
             },
             None => None

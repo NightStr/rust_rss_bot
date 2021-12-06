@@ -43,7 +43,7 @@ impl UserRssRepository for InMemoryUserRepository {
             },
             None => return Err(format!("User {} not found", user_id))
         };
-        return Ok(())
+        Ok(())
     }
 
     fn get_user_list(&self) -> Vec<UserRss> {
@@ -83,7 +83,7 @@ impl UserRssRepository for LocalFileDatabase {
     fn add_subscribe(&self, user_id: i64, subscribe: String) -> Result<(), String> {
         self.db.write(|db| {
                 if let Some(subscribes) = db.get_mut(&user_id) {
-                    if let Err(_) = subscribes.binary_search(&subscribe) {
+                    if subscribes.binary_search(&subscribe).is_err() {
                         subscribes.push(subscribe);
                     } else {
                         dbg!(format!("{} уже добавлена", subscribe));
