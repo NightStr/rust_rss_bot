@@ -21,10 +21,10 @@ impl RssItemsGetter {
 }
 
 impl RssGetterResult {
-    pub fn new(url: &str) -> Self {
-        let channel = rss::Channel::from_url(url).unwrap();
-        let curr = channel.items().len() - 1;
-        Self {channel, curr}
+    pub fn new(url: &str) -> Result<Self, Error> {
+        let channel = rss::Channel::from_url(url)?;
+        let curr = channel.items().len();
+        Ok(Self {channel, curr})
     }
 }
 
@@ -33,19 +33,23 @@ impl Iterator for RssGetterResult {
     type Item = RssItem;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.channel.items().get(self.curr) {
-            Some(item) => {
-                self.curr -= 1;
-                Some(RssItem {
-                    url: String::from(item.link().unwrap_or_default()),
-                    title: String::from(item.title().unwrap_or_default()),
-                    created_date: DateTime::parse_from_rfc2822(
-                        item.pub_date().unwrap_or_default()
-                    ).unwrap().with_timezone(&Utc),
-                    description: item.description().map(|description| from_read(description.as_bytes(), description.len()))
-                })
-            },
-            None => None
+        if self.curr > 0 {
+            match self.channel.items().get(self.curr - 1) {
+                Some(item) => {
+                    self.curr -= 1;
+                    Some(RssItem {
+                        url: String::from(item.link().unwrap_or_default()),
+                        title: String::from(item.title().unwrap_or_default()),
+                        created_date: DateTime::parse_from_rfc2822(
+                            item.pub_date().unwrap_or_default()
+                        ).unwrap().with_timezone(&Utc),
+                        description: item.description().map(|description| from_read(description.as_bytes(), description.len()))
+                    })
+                },
+                None => None
+            }
+        } else {
+            None
         }
     }
 }
@@ -54,6 +58,6 @@ impl Iterator for RssGetterResult {
 impl RssRep for RssItemsGetter {
     fn get_rss(&self, url: &str) -> Result<Box<dyn Iterator<Item=RssItem>>, Error> {
         dbg!(url);
-        Ok(Box::new(RssGetterResult::new(url)))
+        Ok(Box::new(RssGetterResult::new(url)?))
     }
 }
